@@ -1,0 +1,14 @@
+{
+    "editor.fontSize": 16,
+    "workbench.colorTheme": "GitHub Dark Dimmed",
+    // style the status bar
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#500909",
+        "statusBar.noFolderBackground": "#bb2f2f",
+        "statusBar.debuggingBackground": "#8a1515",
+        "statusBar.debuggingForeground": "#ffffff",
+        "statusBar.foreground": "#fefefe",
+        "statusBar.border": "#801010"
+    }
+    
+}
