@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github/islamghany/blog/apis/blog-api/config"
 	"github/islamghany/blog/apis/blog-api/handlers"
+	"github/islamghany/blog/business/auth"
+	"github/islamghany/blog/business/core/user"
+	"github/islamghany/blog/business/core/user/userdb"
 	db "github/islamghany/blog/business/data/dbsql/pgx"
 	v1 "github/islamghany/blog/business/web/v1"
 	"github/islamghany/blog/business/web/v1/debug"
@@ -114,6 +117,10 @@ func run(ctx context.Context, log *logger.Logger, cfg *config.Config) error {
 			log.Error(ctx, "shutdown", "status", "debug v1 router cloased", "host", cfg.DebugHost)
 		}
 	}()
+	// ==========================================================================================
+	// Auth
+	userCore := user.NewCore(log, userdb.NewStore(log, db))
+	auth := auth.NewAuth(log, cfg.JWTSecret, userCore)
 
 	// ==========================================================================================
 	// Starting the main server
@@ -121,6 +128,7 @@ func run(ctx context.Context, log *logger.Logger, cfg *config.Config) error {
 		Log:       log,
 		DB:        db,
 		Whitelist: cfg.WHITELIST,
+		Auth:      auth,
 	}, handlers.Routes{})
 	srv := http.Server{
 		Addr:         cfg.APIHost,

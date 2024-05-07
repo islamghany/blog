@@ -19,6 +19,7 @@ type dbuser struct {
 	CreatedAt      time.Time      `db:"created_at"`
 	UpdatedAt      time.Time      `db:"updated_at"`
 	Enabled        bool           `db:"enabled"`
+	Version        int            `db:"version"`
 }
 
 func toDBUser(user user.User) dbuser {
@@ -37,6 +38,7 @@ func toDBUser(user user.User) dbuser {
 		CreatedAt:      user.CreatedAt.UTC(),
 		UpdatedAt:      user.UpdatedAt.UTC(),
 		Enabled:        user.Enabled,
+		Version:        user.Version,
 	}
 }
 
@@ -60,6 +62,7 @@ func toCoreUser(dbusr dbuser) user.User {
 		CreatedAt:      dbusr.CreatedAt,
 		UpdatedAt:      dbusr.UpdatedAt,
 		Enabled:        dbusr.Enabled,
+		Version:        dbusr.Version,
 	}
 
 }

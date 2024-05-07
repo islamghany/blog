@@ -56,9 +56,34 @@ func (s *Store) QueryByID(ctx context.Context, id uuid.UUID) (user.User, error) 
 	}
 	q := `
 		SELECT 
-			id, email, username, roles, first_name, last_name, created_at, password_hashed, updated_at, enabled
+			id, email, username, roles, first_name, last_name, created_at, password_hashed, updated_at, enabled, version
 		 FROM users
 		WHERE id = :id
+	`
+	var dbusr dbuser
+	if err := db.NamedQueryStruct(ctx, s.log, s.DB, q, data, &dbusr); err != nil {
+		if errors.Is(err, db.ErrDBNotFound) {
+			return user.User{}, user.ErrNotFound
+		}
+		return user.User{}, fmt.Errorf("namedquerystruct: %w", err)
+	}
+	if dbusr.ID == uuid.Nil {
+		return user.User{}, user.ErrNotFound
+	}
+
+	return toCoreUser(dbusr), nil
+}
+func (s *Store) QueryByUsername(ctx context.Context, username string) (user.User, error) {
+	data := struct {
+		Username string `db:"username"`
+	}{
+		Username: username,
+	}
+	q := `
+		SELECT 
+			id, email, username, roles, first_name, last_name, created_at, password_hashed, updated_at, enabled, version
+		 FROM users
+		WHERE username = :username
 	`
 	var dbusr dbuser
 	if err := db.NamedQueryStruct(ctx, s.log, s.DB, q, data, &dbusr); err != nil {
@@ -84,7 +109,8 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 			last_name = :last_name,
 			password_hashed = :password_hashed,
 			updated_at = :updated_at,
-			enabled = :enabled
+			enabled = :enabled,
+			version = :version
 		WHERE
 			id = :id
 	`

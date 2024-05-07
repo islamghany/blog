@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
     password_hashed TEXT NOT NULL,
     enabled BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL,
+    VERSION INT DEFAULT 1
 );

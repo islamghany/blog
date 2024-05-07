@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github/islamghany/blog/business/auth"
 	"github/islamghany/blog/business/web/v1/mid"
 	"github/islamghany/blog/foundation/logger"
 	"github/islamghany/blog/foundation/web"
@@ -27,6 +28,7 @@ type WebMuxConfig struct {
 	shutdown  chan os.Signal
 	DB        *sqlx.DB
 	Whitelist []string
+	Auth      *auth.Auth
 }
 
 // an interface that we use to inject routes from the handlers

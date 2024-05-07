@@ -25,6 +25,7 @@ type Storer interface {
 	QueryByID(context context.Context, id uuid.UUID) (User, error)
 	Update(context context.Context, usr User) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, int, error)
+	QueryByUsername(ctx context.Context, username string) (User, error)
 }
 
 // =============================================================================
@@ -81,6 +82,15 @@ func (c *Core) QueryByID(ctx context.Context, id uuid.UUID) (User, error) {
 	return usr, nil
 }
 
+// QueryByID returns the user with the specified ID.
+func (c *Core) QueryByUsername(ctx context.Context, username string) (User, error) {
+	usr, err := c.store.QueryByUsername(ctx, username)
+	if err != nil {
+		return User{}, fmt.Errorf("querying user by username: %w", err)
+	}
+	return usr, nil
+}
+
 // Update patches the user with the specified usr.
 func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error) {
 	if uu.FirstName != nil {
@@ -101,6 +111,9 @@ func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error
 	}
 	if uu.Enabled != nil {
 		usr.Enabled = *uu.Enabled
+	}
+	if uu.Version != nil {
+		usr.Version = *uu.Version
 	}
 	usr.UpdatedAt = time.Now()
 

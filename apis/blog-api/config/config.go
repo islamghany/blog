@@ -24,6 +24,8 @@ type Config struct {
 	MaxIdleConns int    `mapstructure:"MAX_IDLE_CONNS"`
 	MaxOpenConns int    `mapstructure:"MAX_OPEN_CONNS"`
 	DisabelTLS   bool   `mapstructure:"DISABLE_TLS"`
+	// Security
+	JWTSecret string `mapstructure:"JWT_SECRET" omit:"true"`
 }
 
 func LoadConfig() (config Config, err error) {

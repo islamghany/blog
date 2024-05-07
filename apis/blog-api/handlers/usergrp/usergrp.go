@@ -39,7 +39,7 @@ func (h *UserHandler) Create(ctx context.Context, w http.ResponseWriter, r *http
 		}
 		return response.NewError(err, http.StatusInternalServerError)
 	}
-	return web.Response(ctx, w, toApiUser(usr), http.StatusCreated)
+	return web.Response(ctx, w, ToApiUser(usr), http.StatusCreated)
 }
 
 func (h *UserHandler) QueryByID(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -54,7 +54,7 @@ func (h *UserHandler) QueryByID(ctx context.Context, w http.ResponseWriter, r *h
 		}
 		return response.NewError(err, http.StatusInternalServerError)
 	}
-	return web.Response(ctx, w, toApiUser(usr), http.StatusOK)
+	return web.Response(ctx, w, ToApiUser(usr), http.StatusOK)
 }
 
 func (h *UserHandler) Update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -82,7 +82,7 @@ func (h *UserHandler) Update(ctx context.Context, w http.ResponseWriter, r *http
 	if err != nil {
 		return response.NewError(err, http.StatusInternalServerError)
 	}
-	return web.Response(ctx, w, toApiUser(usr), http.StatusOK)
+	return web.Response(ctx, w, ToApiUser(usr), http.StatusOK)
 }
 
 func (h *UserHandler) Query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -105,7 +105,7 @@ func (h *UserHandler) Query(ctx context.Context, w http.ResponseWriter, r *http.
 	}
 	items := make([]ApiUser, len(users))
 	for i, usr := range users {
-		items[i] = toApiUser(usr)
+		items[i] = ToApiUser(usr)
 	}
 
 	return web.Response(ctx, w, paging.NewResponse(items, t, page.Number, page.Size), http.StatusOK)

@@ -21,9 +21,10 @@ type ApiUser struct {
 	Enabled      bool     `json:"enabled"`
 	CreatedAt    string   `json:"created_at"`
 	UpdatedAt    string   `json:"updated_at"`
+	Version      int      `json:"version"`
 }
 
-func toApiUser(usr user.User) ApiUser {
+func ToApiUser(usr user.User) ApiUser {
 	roles := make([]string, len(usr.Roles))
 	for i, role := range usr.Roles {
 		roles[i] = role.String()
@@ -38,6 +39,7 @@ func toApiUser(usr user.User) ApiUser {
 		Enabled:   usr.Enabled,
 		CreatedAt: usr.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: usr.UpdatedAt.Format(time.RFC3339),
+		Version:   usr.Version,
 	}
 }
 

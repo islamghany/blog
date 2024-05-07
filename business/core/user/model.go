@@ -17,6 +17,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Enabled        bool
+	Version        int
 }
 
 type NewUser struct {
@@ -36,4 +37,5 @@ type UpdateUser struct {
 	Roles             []Role
 	ConfirmedPassword *string
 	Enabled           *bool
+	Version           *int
 }
