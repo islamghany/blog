@@ -15,10 +15,10 @@ func SetUser(ctx context.Context, user *user.User) context.Context {
 }
 
 // User get the user from the context
-func getUser(ctx context.Context) *user.User {
+func GetUser(ctx context.Context) *user.User {
 	usr, ok := ctx.Value(key).(*user.User)
 	if !ok {
-		return nil
+		panic("user not found in context")
 	}
 	return usr
 }

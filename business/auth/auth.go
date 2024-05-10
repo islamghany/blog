@@ -75,30 +75,30 @@ func NewAuth(log *logger.Logger, secretKey string, coreUsr *user.Core) *Auth {
 	}
 }
 
-func (a *Auth) Authenticate(ctx context.Context, r *http.Request) error {
+func (a *Auth) Authenticate(ctx context.Context, r *http.Request) (context.Context, error) {
 	BearerToken := r.Header.Get("Authorization")
 	if BearerToken == "" {
-		return ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 	t := strings.Split(BearerToken, "Bearer ")
 	if len(t) != 2 {
-		return ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 	token := t[1]
 	payload, err := a.Verify(token)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := payload.Valid(); err != nil {
-		return err
+		return nil, err
 	}
 	user, err := a.CoreUsr.QueryByID(ctx, payload.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := payload.Outdated(user.Version); err != nil {
-		return err
+		return nil, err
 	}
-	ctx = SetUser(ctx, &user)
-	return nil
+	newCtx := SetUser(ctx, &user)
+	return newCtx, nil
 }
