@@ -26,6 +26,7 @@ type Storer interface {
 	Update(context context.Context, usr User) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, int, error)
 	QueryByUsername(ctx context.Context, username string) (User, error)
+	Count(ctx context.Context) (int, error)
 }
 
 // =============================================================================
@@ -132,4 +133,14 @@ func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, 
 		return nil, 0, fmt.Errorf("querying users: %w", err)
 	}
 	return users, total, nil
+}
+
+// Count
+func (c *Core) Count(ctx context.Context) (int, error) {
+	t, err := c.store.Count(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return t, nil
 }

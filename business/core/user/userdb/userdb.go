@@ -155,3 +155,18 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 	u, t := toCoreUserWithTotalSlice(dbusrs)
 	return u, t, nil
 }
+
+func (s *Store) Count(ctx context.Context) (int, error) {
+	q := `SELECT 
+			c AS total
+		FROM
+		  user_count
+		  `
+	val := struct {
+		Total int `db:"total"`
+	}{}
+	if err := db.NamedQueryStruct(ctx, s.log, s.DB, q, map[string]any{}, &val); err != nil {
+		return 0, fmt.Errorf("namedquerystruct: %w", err)
+	}
+	return val.Total, nil
+}
