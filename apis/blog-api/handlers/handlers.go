@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github/islamghany/blog/apis/blog-api/handlers/articleapi"
 	"github/islamghany/blog/apis/blog-api/handlers/authapi"
 	"github/islamghany/blog/apis/blog-api/handlers/healthcheck"
 	"github/islamghany/blog/apis/blog-api/handlers/usergrp"
@@ -23,4 +24,11 @@ func (Routes) Add(app *web.App, cfg *v1.WebMuxConfig) {
 	authapi.Routes(app, authapi.Config{
 		Auth: cfg.Auth,
 	})
+	articleapi.Routes(app, articleapi.Config{
+		Log:         cfg.Log,
+		DB:          cfg.DB,
+		Auth:        cfg.Auth,
+		ArticleCore: cfg.ArticleCore,
+	})
+
 }

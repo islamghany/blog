@@ -37,13 +37,17 @@ func Decode(w http.ResponseWriter, r *http.Request, dst any) error {
 	return nil
 }
 
-func ParamID(r *http.Request, key string) (string, error) {
+func ParamID(r *http.Request, key string) (int, error) {
 	params := httprouter.ParamsFromContext(r.Context())
 	val := params.ByName(key)
 	if val == "" {
-		return "", fmt.Errorf("url parameter %q missing", key)
+		return 0, fmt.Errorf("url parameter %q missing", key)
 	}
-	return val, nil
+	id, err := strconv.Atoi(val)
+	if err != nil {
+		return 0, errors.New("url parameter id must be an integer")
+	}
+	return id, nil
 }
 
 func ParamUUID(r *http.Request, key string) (uuid.UUID, error) {

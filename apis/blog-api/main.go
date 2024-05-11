@@ -7,6 +7,8 @@ import (
 	"github/islamghany/blog/apis/blog-api/config"
 	"github/islamghany/blog/apis/blog-api/handlers"
 	"github/islamghany/blog/business/auth"
+	"github/islamghany/blog/business/core/article"
+	"github/islamghany/blog/business/core/article/articledb"
 	"github/islamghany/blog/business/core/user"
 	"github/islamghany/blog/business/core/user/userdb"
 	db "github/islamghany/blog/business/data/dbsql/pgx"
@@ -120,15 +122,17 @@ func run(ctx context.Context, log *logger.Logger, cfg *config.Config) error {
 	// ==========================================================================================
 	// Auth
 	userCore := user.NewCore(log, userdb.NewStore(log, db))
+	articleCore := article.NewCore(log, articledb.NewStore(log, db), userCore)
 	auth := auth.NewAuth(log, cfg.JWTSecret, userCore)
 
 	// ==========================================================================================
 	// Starting the main server
 	webMux := v1.WebMux(&v1.WebMuxConfig{
-		Log:       log,
-		DB:        db,
-		Whitelist: cfg.WHITELIST,
-		Auth:      auth,
+		Log:         log,
+		DB:          db,
+		Whitelist:   cfg.WHITELIST,
+		Auth:        auth,
+		ArticleCore: articleCore,
 	}, handlers.Routes{})
 	srv := http.Server{
 		Addr:         cfg.APIHost,
