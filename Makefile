@@ -42,12 +42,16 @@ db/pgcli:
 
 db/migrate/up:
 	@migrate -path business/data/dbmigrate/migrations -database "${DB_DSN}" -verbose up
-
+db/migrate/up/latest:
+	@migrate -path business/data/dbmigrate/migrations -database "${DB_DSN}" -verbose up 1
+	
 db/migrate/new:
 	@migrate create -ext sql -dir business/data/dbmigrate/migrations -seq ${name}
 
 db/migrate/down:
 	@migrate -path business/data/dbmigrate/migrations -database "${DB_DSN}" -verbose down
+db/migrate/down/latest:
+	@migrate -path business/data/dbmigrate/migrations -database "${DB_DSN}" -verbose down 1
 
 db/init:
 	@echo "Seeding database"

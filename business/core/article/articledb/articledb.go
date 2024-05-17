@@ -60,3 +60,24 @@ func (s *Store) QueryByID(ctx context.Context, id int) (article.Article, error) 
 	}
 	return toArticle(dbart), nil
 }
+
+func (s *Store) Update(ctx context.Context, art article.Article) error {
+	q := `
+	 UPDATE articles
+	 SET
+		title = :title,
+		content = :content,
+		tags = :tags,
+		updated_at = :updated_at
+	 WHERE id = :id and author_id = :author_id
+   `
+
+	dbart := toDBArticle(art)
+	if err := db.NamedExecContext(ctx, s.Log, s.DB, q, dbart); err != nil {
+		if errors.Is(err, db.ErrDBNotFound) {
+			return article.ErrorNotFound
+		}
+		return fmt.Errorf("updating article %d: %w", art.ID, err)
+	}
+	return nil
+}

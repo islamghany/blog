@@ -16,6 +16,7 @@ var (
 type Storer interface {
 	Create(ctx context.Context, art Article) (int, error)
 	QueryByID(ctx context.Context, id int) (Article, error)
+	Update(ctx context.Context, art Article) error
 }
 
 type Core struct {
@@ -55,4 +56,22 @@ func (c *Core) QueryByID(ctx context.Context, id int) (Article, error) {
 		return Article{}, err
 	}
 	return art, nil
+}
+
+func (c *Core) Update(ctx context.Context, art Article, ua UpdateArticle) error {
+	if ua.Title != nil {
+		art.Title = *ua.Title
+	}
+	if ua.Content != nil {
+		art.Content = *ua.Content
+	}
+	if len(ua.Tags) > 0 {
+		art.Tags = ua.Tags
+	}
+	art.UpdatedAt = time.Now().UTC()
+	err := c.store.Update(ctx, art)
+	if err != nil {
+		return err
+	}
+	return nil
 }

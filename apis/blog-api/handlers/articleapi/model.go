@@ -31,21 +31,38 @@ func toApiArticle(a article.Article) ApiArticle {
 }
 
 type ApiNewArticle struct {
-	Title    string    `json:"title" validate:"required,min=3,max=100"`
-	Content  string    `json:"content" validate:"required,min=3,max=1500"`
-	Tags     []string  `json:"tags" validate:"required,min=1"`
-	AuthorID uuid.UUID `json:"author_id" validate:"required,uuid"`
+	Title   string   `json:"title" validate:"required,min=3,max=100"`
+	Content string   `json:"content" validate:"required,min=3,max=1500"`
+	Tags    []string `json:"tags" validate:"required,min=1"`
 }
 
 func (a *ApiNewArticle) Validate() error {
 	return validate.Check(a)
 }
 
-func toNewArticleCore(a ApiNewArticle) article.NewArticle {
+func toNewArticleCore(a ApiNewArticle, authorID uuid.UUID) article.NewArticle {
 	return article.NewArticle{
 		Title:    a.Title,
 		Content:  a.Content,
 		Tags:     a.Tags,
-		AuthorID: a.AuthorID,
+		AuthorID: authorID,
+	}
+}
+
+type ApiUpdateArticle struct {
+	Title   *string  `json:"title" validate:"omitempty,min=3,max=100"`
+	Content *string  `json:"content" validate:"omitempty,min=3,max=1500"`
+	Tags    []string `json:"tags" validate:"omitempty"`
+}
+
+func (a *ApiUpdateArticle) Validate() error {
+	return validate.Check(a)
+}
+
+func toUpdateArticleCore(a ApiUpdateArticle) article.UpdateArticle {
+	return article.UpdateArticle{
+		Title:   a.Title,
+		Content: a.Content,
+		Tags:    a.Tags,
 	}
 }

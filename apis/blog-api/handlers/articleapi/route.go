@@ -3,6 +3,7 @@ package articleapi
 import (
 	"github/islamghany/blog/business/auth"
 	"github/islamghany/blog/business/core/article"
+	"github/islamghany/blog/business/web/v1/mid"
 	"net/http"
 
 	// "github/islamghany/blog/business/core/user"
@@ -23,7 +24,7 @@ type Config struct {
 func Routes(app *web.App, cfg Config) {
 	version := "v1"
 	articleHandler := NewArticleHandler(cfg.Log, cfg.ArticleCore, cfg.Auth.CoreUsr)
-
-	app.Handle(http.MethodPost, version, "/article", articleHandler.Create)
+	app.Handle(http.MethodPost, version, "/article", articleHandler.Create, mid.Authen(cfg.Auth))
 	app.Handle(http.MethodGet, version, "/article/:id", articleHandler.QueryByID)
+	app.Handle(http.MethodPatch, version, "/article/:id", articleHandler.Update, mid.Authen(cfg.Auth))
 }

@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS articles (
     tags TEXT [] NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (author_id) REFERENCES users (id)
+    FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS articles_author_id_idx ON articles (author_id);

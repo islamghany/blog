@@ -3,6 +3,7 @@ package articleapi
 import (
 	"context"
 	"fmt"
+	"github/islamghany/blog/business/auth"
 	"github/islamghany/blog/business/core/article"
 	"github/islamghany/blog/business/core/user"
 	"github/islamghany/blog/business/web/v1/response"
@@ -30,14 +31,15 @@ func (h *ArticleHandler) Create(ctx context.Context, w http.ResponseWriter, r *h
 	if err := web.Decode(w, r, &na); err != nil {
 		return response.NewError(err, http.StatusBadRequest)
 	}
-	coreNewArticle := toNewArticleCore(na)
+	usr := auth.GetUser(ctx)
+	coreNewArticle := toNewArticleCore(na, usr.ID)
 
 	id, err := h.articleCore.Create(ctx, coreNewArticle)
 	if err != nil {
 		return response.NewError(err, http.StatusInternalServerError)
 	}
 
-	w.Header().Set("Location", fmt.Sprintf("/v1/article/%d", id))
+	w.Header().Set("Location", fmt.Sprintf("%d", id))
 
 	return web.Response(ctx, w, nil, http.StatusCreated)
 }
@@ -57,4 +59,32 @@ func (h *ArticleHandler) QueryByID(ctx context.Context, w http.ResponseWriter, r
 	}
 
 	return web.Response(ctx, w, toApiArticle(art), http.StatusOK)
+}
+
+func (h *ArticleHandler) Update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	id, err := web.ParamID(r, "id")
+	if err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+	ua := ApiUpdateArticle{}
+	if err := web.Decode(w, r, &ua); err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+	art, err := h.articleCore.QueryByID(ctx, id)
+	if err != nil {
+		if err == article.ErrorNotFound {
+			return response.NewError(err, http.StatusNotFound)
+		}
+		return response.NewError(err, http.StatusInternalServerError)
+	}
+
+	err = h.articleCore.Update(ctx, art, toUpdateArticleCore(ua))
+	if err != nil {
+		if err == article.ErrorNotFound {
+			return response.NewError(err, http.StatusNotFound)
+		}
+		return response.NewError(err, http.StatusInternalServerError)
+	}
+
+	return web.Response(ctx, w, nil, http.StatusNoContent)
 }
