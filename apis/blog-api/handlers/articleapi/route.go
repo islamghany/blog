@@ -27,4 +27,5 @@ func Routes(app *web.App, cfg Config) {
 	app.Handle(http.MethodPost, version, "/article", articleHandler.Create, mid.Authen(cfg.Auth))
 	app.Handle(http.MethodGet, version, "/article/:id", articleHandler.QueryByID)
 	app.Handle(http.MethodPatch, version, "/article/:id", articleHandler.Update, mid.Authen(cfg.Auth))
+	app.Handle(http.MethodGet, version, "/article", articleHandler.Query)
 }

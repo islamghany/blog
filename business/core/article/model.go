@@ -1,6 +1,7 @@
 package article
 
 import (
+	"github/islamghany/blog/business/core/user"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,4 +31,15 @@ type UpdateArticle struct {
 	Title   *string
 	Content *string
 	Tags    []string
+}
+
+// ArticleWithAuthor
+type ArticleWithAuthor struct {
+	ID        int
+	Title     string
+	Content   string
+	Tags      []string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	user.User
 }

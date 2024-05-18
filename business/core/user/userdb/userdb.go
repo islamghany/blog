@@ -34,7 +34,7 @@ func (s *Store) Create(ctx context.Context, nu user.User) error {
 		VALUES
 		    (:id, :email, :username, :roles, :first_name, :last_name, :password_hashed, :created_at, :updated_at, :enabled)
 	`
-	dbusr := toDBUser(nu)
+	dbusr := ToDBUser(nu)
 	if err := db.NamedExecContext(ctx, s.log, s.DB, q, dbusr); err != nil {
 		if errors.Is(err, db.ErrDBDuplicate) {
 			if strings.Contains(err.Error(), "users_username_key") {
@@ -60,7 +60,7 @@ func (s *Store) QueryByID(ctx context.Context, id uuid.UUID) (user.User, error) 
 		 FROM users
 		WHERE id = :id
 	`
-	var dbusr dbuser
+	var dbusr DBUser
 	if err := db.NamedQueryStruct(ctx, s.log, s.DB, q, data, &dbusr); err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			return user.User{}, user.ErrNotFound
@@ -71,7 +71,7 @@ func (s *Store) QueryByID(ctx context.Context, id uuid.UUID) (user.User, error) 
 		return user.User{}, user.ErrNotFound
 	}
 
-	return toCoreUser(dbusr), nil
+	return ToCoreUser(dbusr), nil
 }
 func (s *Store) QueryByUsername(ctx context.Context, username string) (user.User, error) {
 	data := struct {
@@ -85,7 +85,7 @@ func (s *Store) QueryByUsername(ctx context.Context, username string) (user.User
 		 FROM users
 		WHERE username = :username
 	`
-	var dbusr dbuser
+	var dbusr DBUser
 	if err := db.NamedQueryStruct(ctx, s.log, s.DB, q, data, &dbusr); err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			return user.User{}, user.ErrNotFound
@@ -96,7 +96,7 @@ func (s *Store) QueryByUsername(ctx context.Context, username string) (user.User
 		return user.User{}, user.ErrNotFound
 	}
 
-	return toCoreUser(dbusr), nil
+	return ToCoreUser(dbusr), nil
 }
 
 func (s *Store) Update(ctx context.Context, usr user.User) error {
@@ -114,7 +114,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 		WHERE
 			id = :id
 	`
-	dbusr := toDBUser(usr)
+	dbusr := ToDBUser(usr)
 	if err := db.NamedExecContext(ctx, s.log, s.DB, q, dbusr); err != nil {
 		if errors.Is(err, db.ErrDBDuplicate) {
 			if strings.Contains(err.Error(), "users_username_key") {
@@ -148,11 +148,11 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 	}
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset LIMIT :limit")
-	var dbusrs []dbuserWithTotal
+	var dbusrs []DBUserWithTotal
 	if err := db.NamedQuerySlice(ctx, s.log, s.DB, buf.String(), data, &dbusrs); err != nil {
 		return nil, 0, fmt.Errorf("namedqueryslice: %w", err)
 	}
-	u, t := toCoreUserWithTotalSlice(dbusrs)
+	u, t := ToCoreUserWithTotalSlice(dbusrs)
 	return u, t, nil
 }
 

@@ -81,3 +81,27 @@ func (s *Store) Update(ctx context.Context, art article.Article) error {
 	}
 	return nil
 }
+
+func (s *Store) Query(ctx context.Context, search string, pageNumber, rowsPerPage int) ([]article.ArticleWithAuthor, int, error) {
+	data := map[string]any{
+		"offset": (pageNumber - 1) * rowsPerPage,
+		"limit":  rowsPerPage,
+		"search": search,
+	}
+	q := `
+		SELECT 
+			 a.id as pid, title, substring(content, 0, 100) as content, tags, a.created_at as pcreated_at, a.updated_at as pupdated_at, 
+			 username, email, u.created_at as created_at, u.updated_at as updated_at, u.id as id
+		FROM articles a
+		JOIN users u ON a.author_id = u.id
+		WHERE (a.tsv_document @@ to_tsquery('english', :search))
+		ORDER BY ts_rank(a.tsv_document, to_tsquery('english', :search)) DESC
+		OFFSET :offset
+		LIMIT :limit
+	`
+	var dbarts []DBArticleWithAuthor
+	if err := db.NamedQuerySlice(ctx, s.Log, s.DB, q, data, &dbarts); err != nil {
+		return nil, 0, fmt.Errorf("querying articles: %w", err)
+	}
+	return toArticleWithAuthorSlice(dbarts), len(dbarts), nil
+}

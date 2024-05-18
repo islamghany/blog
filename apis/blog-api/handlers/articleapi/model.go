@@ -1,6 +1,7 @@
 package articleapi
 
 import (
+	"github/islamghany/blog/apis/blog-api/handlers/usergrp"
 	"github/islamghany/blog/business/core/article"
 	"github/islamghany/blog/foundation/validate"
 	"time"
@@ -65,4 +66,35 @@ func toUpdateArticleCore(a ApiUpdateArticle) article.UpdateArticle {
 		Content: a.Content,
 		Tags:    a.Tags,
 	}
+}
+
+// ArticleWithAuthor
+type ApiArticleWithAuthor struct {
+	ID        int             `json:"id"`
+	Title     string          `json:"title"`
+	Content   string          `json:"content"`
+	Tags      []string        `json:"tags"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	Author    usergrp.ApiUser `json:"author"`
+}
+
+func toApiArticleWithAuthor(a article.ArticleWithAuthor) ApiArticleWithAuthor {
+	return ApiArticleWithAuthor{
+		ID:        a.ID,
+		Title:     a.Title,
+		Content:   a.Content,
+		Tags:      a.Tags,
+		CreatedAt: a.CreatedAt,
+		UpdatedAt: a.UpdatedAt,
+		Author:    usergrp.ToApiUser(a.User),
+	}
+}
+
+func toApiArticleWithAuthorSlice(arts []article.ArticleWithAuthor) []ApiArticleWithAuthor {
+	aa := make([]ApiArticleWithAuthor, len(arts))
+	for i, a := range arts {
+		aa[i] = toApiArticleWithAuthor(a)
+	}
+	return aa
 }

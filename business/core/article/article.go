@@ -17,6 +17,7 @@ type Storer interface {
 	Create(ctx context.Context, art Article) (int, error)
 	QueryByID(ctx context.Context, id int) (Article, error)
 	Update(ctx context.Context, art Article) error
+	Query(ctx context.Context, search string, pageNumber, rowsPerPage int) ([]ArticleWithAuthor, int, error)
 }
 
 type Core struct {
@@ -74,4 +75,8 @@ func (c *Core) Update(ctx context.Context, art Article, ua UpdateArticle) error 
 		return err
 	}
 	return nil
+}
+
+func (c *Core) Query(ctx context.Context, search string, pageNumber, rowsPerPage int) ([]ArticleWithAuthor, int, error) {
+	return c.store.Query(ctx, search, pageNumber, rowsPerPage)
 }

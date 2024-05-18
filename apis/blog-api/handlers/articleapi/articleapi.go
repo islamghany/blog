@@ -6,8 +6,10 @@ import (
 	"github/islamghany/blog/business/auth"
 	"github/islamghany/blog/business/core/article"
 	"github/islamghany/blog/business/core/user"
+	"github/islamghany/blog/business/web/v1/paging"
 	"github/islamghany/blog/business/web/v1/response"
 	"github/islamghany/blog/foundation/logger"
+	"github/islamghany/blog/foundation/validate"
 	"github/islamghany/blog/foundation/web"
 	"net/http"
 )
@@ -87,4 +89,23 @@ func (h *ArticleHandler) Update(ctx context.Context, w http.ResponseWriter, r *h
 	}
 
 	return web.Response(ctx, w, nil, http.StatusNoContent)
+}
+
+func (h *ArticleHandler) Query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	page, err := paging.ParseRequest(r)
+	if err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+	values := r.URL.Query()
+	if v := values.Get("search"); v == "" {
+		return validate.NewFieldError("search", "must be a string")
+	}
+	arts, _, err := h.articleCore.Query(ctx, values.Get("search"), page.Number, page.Size)
+	apiArtWithAuthor := toApiArticleWithAuthorSlice(arts)
+
+	if err != nil {
+		return response.NewError(err, http.StatusInternalServerError)
+	}
+	return web.Response(ctx, w, apiArtWithAuthor, http.StatusOK)
+
 }

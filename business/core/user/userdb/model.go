@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type dbuser struct {
+type DBUser struct {
 	ID             uuid.UUID      `db:"id"`
 	Email          string         `db:"email"`
 	Username       string         `db:"username"`
@@ -22,12 +22,12 @@ type dbuser struct {
 	Version        int            `db:"version"`
 }
 
-func toDBUser(user user.User) dbuser {
+func ToDBUser(user user.User) DBUser {
 	roles := make(dbarray.String, len(user.Roles))
 	for i, role := range user.Roles {
 		roles[i] = role.Name()
 	}
-	return dbuser{
+	return DBUser{
 		ID:             user.ID,
 		Email:          user.Email,
 		Username:       user.Username,
@@ -42,7 +42,7 @@ func toDBUser(user user.User) dbuser {
 	}
 }
 
-func toCoreUser(dbusr dbuser) user.User {
+func ToCoreUser(dbusr DBUser) user.User {
 	roles := make([]user.Role, len(dbusr.Roles))
 	for i, role := range dbusr.Roles {
 		r, err := user.ParseRole(role)
@@ -67,30 +67,30 @@ func toCoreUser(dbusr dbuser) user.User {
 
 }
 
-func toCoreUserSlice(dbusers []dbuser) []user.User {
-	users := make([]user.User, len(dbusers))
-	for i, dbuser := range dbusers {
-		usr := toCoreUser(dbuser)
+func ToCoreUserSlice(DBUsers []DBUser) []user.User {
+	users := make([]user.User, len(DBUsers))
+	for i, DBUser := range DBUsers {
+		usr := ToCoreUser(DBUser)
 		users[i] = usr
 	}
 	return users
 }
 
-type dbuserWithTotal struct {
+type DBUserWithTotal struct {
 	Total int `db:"total"`
-	dbuser
+	DBUser
 }
 
-func toCoreUserWithTotal(dbuser dbuserWithTotal) (user.User, int) {
-	usr := toCoreUser(dbuser.dbuser)
-	return usr, dbuser.Total
+func ToCoreUserWithTotal(DBUser DBUserWithTotal) (user.User, int) {
+	usr := ToCoreUser(DBUser.DBUser)
+	return usr, DBUser.Total
 }
 
-func toCoreUserWithTotalSlice(dbusers []dbuserWithTotal) ([]user.User, int) {
-	users := make([]user.User, len(dbusers))
+func ToCoreUserWithTotalSlice(DBUsers []DBUserWithTotal) ([]user.User, int) {
+	users := make([]user.User, len(DBUsers))
 	var total int
-	for i, dbuser := range dbusers {
-		usr, t := toCoreUserWithTotal(dbuser)
+	for i, DBUser := range DBUsers {
+		usr, t := ToCoreUserWithTotal(DBUser)
 		users[i] = usr
 		total = t
 	}
