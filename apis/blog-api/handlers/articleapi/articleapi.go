@@ -6,6 +6,7 @@ import (
 	"github/islamghany/blog/business/auth"
 	"github/islamghany/blog/business/core/article"
 	"github/islamghany/blog/business/core/user"
+	"github/islamghany/blog/business/data/transaction"
 	"github/islamghany/blog/business/web/v1/paging"
 	"github/islamghany/blog/business/web/v1/response"
 	"github/islamghany/blog/foundation/logger"
@@ -26,6 +27,44 @@ func NewArticleHandler(log *logger.Logger, articleCore *article.Core, userCore *
 		articleCore: articleCore,
 		userCore:    userCore,
 	}
+}
+
+func (h *ArticleHandler) executeUnderTransaction(ctx context.Context) (*ArticleHandler, error) {
+	if tx, ok := transaction.Get(ctx); ok {
+		art, err := h.articleCore.ExecuteUnderTransaction(tx)
+		if err != nil {
+			return nil, err
+		}
+		h = &ArticleHandler{
+			log:         h.log,
+			articleCore: art,
+			userCore:    h.userCore,
+		}
+		return h, nil
+	}
+	return h, nil
+}
+
+func (h *ArticleHandler) CreateWithTran(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	h, err := h.executeUnderTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	var na ApiNewArticle
+	if err := web.Decode(w, r, &na); err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+	usr := auth.GetUser(ctx)
+	coreNewArticle := toNewArticleCore(na, usr.ID)
+
+	id, err := h.articleCore.Create(ctx, coreNewArticle)
+	if err != nil {
+		return response.NewError(err, http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Location", fmt.Sprintf("%d", id))
+
+	return web.Response(ctx, w, nil, http.StatusCreated)
 }
 
 func (h *ArticleHandler) Create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

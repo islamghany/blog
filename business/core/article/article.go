@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github/islamghany/blog/business/core/user"
+	"github/islamghany/blog/business/data/transaction"
 	"github/islamghany/blog/foundation/logger"
 	"time"
 )
@@ -14,6 +15,7 @@ var (
 )
 
 type Storer interface {
+	ExecuteUnderTransaction(tx transaction.Transaction) (Storer, error)
 	Create(ctx context.Context, art Article) (int, error)
 	QueryByID(ctx context.Context, id int) (Article, error)
 	Update(ctx context.Context, art Article) error
@@ -32,6 +34,23 @@ func NewCore(log *logger.Logger, store Storer, userCore *user.Core) *Core {
 		log:      log,
 		userCore: userCore,
 	}
+}
+
+// ExecuteUnderTransaction constructs a new Core value that will use the
+// specified transaction in any store related calls.
+func (c *Core) ExecuteUnderTransaction(tx transaction.Transaction) (*Core, error) {
+	trS, err := c.store.ExecuteUnderTransaction(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	c = &Core{
+		store:    trS,
+		log:      c.log,
+		userCore: c.userCore,
+	}
+
+	return c, nil
 }
 
 func (c *Core) Create(ctx context.Context, na NewArticle) (int, error) {

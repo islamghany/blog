@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github/islamghany/blog/business/core/article"
 	db "github/islamghany/blog/business/data/dbsql/pgx"
+	"github/islamghany/blog/business/data/transaction"
 	"github/islamghany/blog/foundation/logger"
 
 	"github.com/jmoiron/sqlx"
@@ -13,7 +14,7 @@ import (
 
 type Store struct {
 	Log *logger.Logger
-	DB  *sqlx.DB
+	DB  sqlx.ExtContext
 }
 
 func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
@@ -21,6 +22,19 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 		Log: log,
 		DB:  db,
 	}
+}
+func (s *Store) ExecuteUnderTransaction(tx transaction.Transaction) (article.Storer, error) {
+	ec, err := db.GetExtContext(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	as := &Store{
+		Log: s.Log,
+		DB:  ec,
+	}
+
+	return as, nil
 }
 
 func (s *Store) Create(ctx context.Context, art article.Article) (int, error) {
