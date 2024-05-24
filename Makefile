@@ -6,7 +6,7 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 
 
 run:
-	go run apis/blog-api/main.go
+	go run apis/blog-api/main.go | go run apis/tooling/logfmt/main.go
 
 debug:
 	curl http://localhost:8001

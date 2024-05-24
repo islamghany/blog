@@ -60,7 +60,9 @@ func (s *Store) QueryByID(ctx context.Context, id int) (article.Article, error) 
 		ID int `db:"id"`
 	}{ID: id}
 	q := `
-		SELECT * FROM articles WHERE id = :id;
+		SELECT 
+			id, title, content, tags, author_id, created_at, updated_at
+		FROM articles WHERE id = :id;
 	`
 	dbart := dbarticle{}
 	if err := db.NamedQueryStruct(ctx, s.Log, s.DB, q, args, &dbart); err != nil {
