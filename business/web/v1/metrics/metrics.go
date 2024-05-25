@@ -17,10 +17,10 @@ var m *metrics
 
 func init() {
 	m = &metrics{
-		goroutines: expvar.NewInt("current_running_goroutines"),
-		requests:   expvar.NewInt("total_requests_received"),
-		errors:     expvar.NewInt("total_errros_occurred"),
-		panics:     expvar.NewInt("total_panics_occurred"),
+		goroutines: expvar.NewInt("goroutines"),
+		requests:   expvar.NewInt("requests"),
+		errors:     expvar.NewInt("errors"),
+		panics:     expvar.NewInt("panics"),
 	}
 }
 

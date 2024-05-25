@@ -1,0 +1,36 @@
+# Build Go Binary
+FROM golang:1.22 as build_blog
+# Set CGO_ENABLED=0 to build a static binary
+ENV CGO_ENABLED=0
+ARG BUILD_REF
+
+# Copy the source code into the container
+COPY . /service
+
+# Set the working directory
+WORKDIR /service/apis/blog-api
+RUN go build -o blog-api -ldflags "-X main.build=${BUILD_REF}"
+
+# Build the final image
+FROM alpine:3.19
+ARG BUILD_DATE
+ARG BUILD_REF
+# The combined use of addgroup and adduser in the Dockerfile is to ensure that the application runs under a specific non-root user,
+# enhancing security. Running applications as non-root users is a best practice because it limits the potential damage that can be done if the application is compromised.
+RUN addgroup -g 1000 -S blog && \
+    adduser -u 1000 -h /service -G blog -S blog
+
+# Copy the built binary from the build stage
+COPY --from=build_blog --chown=blog:blog /service/apis/blog-api/blog-api /service/blog-api
+
+# Copy the environment file into the container
+COPY dev.env /service/dev.env
+
+# Set the working directory
+WORKDIR /service
+
+# Set the user
+USER blog
+
+# Define the entrypoint
+CMD [ "./blog-api" ]
