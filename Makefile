@@ -16,8 +16,10 @@ GOLANG          := golang:1.21.3
 POSTGRES        := postgres:15.4
 DB_DSN 			:= postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?sslmode=disable
 
-APP_NAME 		:= blog-api
+BASE_IMAGE_NAME := localhost/islamghany
 VERSION         := 0.0.1
+APP_NAME 		:= blog-api
+BLOG_IMAGE_NAME := ${BASE_IMAGE_NAME}/${APP_NAME}:${VERSION}
 
 
 env:
@@ -28,20 +30,20 @@ docker/build:
 	@echo "Building docker image"
 	docker build \
 		-f infra/docker/dockerfile.blog \
-		-t ${APP_NAME} \
-		--build-arg BUILD_REF=$(APP_NAME) \
+		-t ${BLOG_IMAGE_NAME} \
+		--build-arg BUILD_REF=$(BLOG_IMAGE_NAME) \
 		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
 		.
 docker/run:
 	@echo "Running docker image"
-	docker run -p 8000:8000 ${APP_NAME} --name ${APP_NAME}
+	docker run -p 8000:8000 ${BLOG_IMAGE_NAME}
 
 docker/stop:
 	@echo "Stopping docker image"
-	docker stop ${APP_NAME}
+	docker stop ${BLOG_IMAGE_NAME}
 docker/remove:
 	@echo "Removing docker image"
-	docker rm ${APP_NAME}
+	docker rm ${BLOG_IMAGE_NAME}
 
 docker/db/run:
 	@echo "Running postgres db"
