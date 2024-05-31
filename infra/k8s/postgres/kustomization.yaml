@@ -1,0 +1,3 @@
+resources:
+  - postgres-deployment.yaml
+  - postgres-pv.yaml

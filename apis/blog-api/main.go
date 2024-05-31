@@ -39,7 +39,7 @@ func main() {
 
 	logsEvents := logger.Events{
 		Error: func(ctx context.Context, r logger.Record) {
-			log.Info(ctx, "TODO: Send an alert")
+			log.Info(ctx, "BLOG: Send an alert")
 		},
 	}
 
@@ -52,7 +52,7 @@ func main() {
 		minLevel = logger.LevelDebug
 	}
 
-	log = logger.NewWithEvents(os.Stdout, minLevel, "TODO-SERVICE", tracerIDFunc, logsEvents)
+	log = logger.NewWithEvents(os.Stdout, minLevel, "BLOG-SERVICE", tracerIDFunc, logsEvents)
 
 	// ========================================================================================
 	// GOMAXPROCS
@@ -60,7 +60,7 @@ func main() {
 
 	// ========================================================================================
 	// Initialize the configuration.
-	cfg, err := config.LoadConfig()
+	cfg, err := config.LoadConfig(true)
 	if err != nil {
 		log.Error(ctx, "startup", "msg", err)
 		return

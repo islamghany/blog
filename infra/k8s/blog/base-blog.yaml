@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blog-system
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog
+  namespace: blog-system
+
+spec:
+  selector:
+    matchLabels:
+      app: blog
+
+  template:
+    metadata:
+      labels:
+        app: blog
+
+    spec:
+      #don't pull the image from the internet
+      containers:
+        - name: blog
+          image: localhost/islamghany/blog-api:0.0.1
+          imagePullPolicy: Never
+          ports:
+            - name: blog
+              containerPort: 8000
+            - name: blog-debug
+              containerPort: 8001
+          envFrom:
+            - configMapRef:
+                name: blog-config

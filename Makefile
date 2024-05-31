@@ -6,6 +6,10 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 
 run:
 	go run apis/blog-api/main.go | go run apis/tooling/logfmt/main.go
+run/migrate:
+	go run apis/tooling/admin/main.go migrate
+run/init:
+	go run apis/tooling/admin/main.go migrate,seed
 
 debug:
 	curl http://localhost:8001
@@ -19,6 +23,7 @@ DB_DSN 			:= postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?sslmode=
 BASE_IMAGE_NAME := localhost/islamghany
 VERSION         := 0.0.1
 APP_NAME 		:= blog-api
+NAMESPACE       := blog-system
 BLOG_IMAGE_NAME := ${BASE_IMAGE_NAME}/${APP_NAME}:${VERSION}
 
 
@@ -34,6 +39,10 @@ docker/build:
 		--build-arg BUILD_REF=$(BLOG_IMAGE_NAME) \
 		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
 		.
+docker/rmi:
+	@echo "Removing docker image"
+	docker rmi ${BLOG_IMAGE_NAME}
+
 docker/run:
 	@echo "Running docker image"
 	docker run -p 8000:8000 ${BLOG_IMAGE_NAME}
@@ -57,6 +66,34 @@ docker/db/start:
 	@echo "starting postgres db"
 	docker start ${DB_NAME}
 
+## k8s
+dev-up:
+	@echo "Making minikube look at the local docker daemon"
+	eval $(minikube -p minikube docker-env)
+	@echo "Building docker image for blog api in minikube"
+	docker build \
+		-f infra/docker/dockerfile.blog \
+		-t ${BLOG_IMAGE_NAME} \
+		--build-arg BUILD_REF=$(BLOG_IMAGE_NAME) \
+		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+		.
+	@echo "pull postgres:15.4 to minikube"
+	minikube image pull ${POSTGRES}
+
+dev-apply:
+	kustomize build infra/k8s/blog | kubectl apply -f -
+	kustomize build infra/k8s/postgres | kubectl apply -f -
+dev-down:
+	kustomize build infra/k8s/blog | kubectl delete -f -
+	kustomize build infra/k8s/postgres | kubectl delete -f -
+
+dev-status-all:
+	kubectl get nodes -o wide
+	kubectl get svc -o wide
+	kubectl get pods -o wide --watch --all-namespaces
+
+dev-logs:
+	kubectl logs --namespace=$(NAMESPACE) -l app=blog --all-containers=true -f --tail=100 --max-log-requests=6 | go run apis/tooling/logfmt/main.go -service=$(BLOG_IMAGE_NAME)
 
 ## database 
 db/psql:

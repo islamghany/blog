@@ -1,0 +1,4 @@
+resources:
+  - base-blog.yaml
+  - blog-service.yaml
+  - blog-configmap.yaml

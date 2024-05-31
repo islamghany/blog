@@ -2,61 +2,68 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"github/islamghany/blog/apis/tooling/admin/commands"
 	db "github/islamghany/blog/business/data/dbsql/pgx"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	cmd               string
-	db_name           string
-	db_pass           string
-	db_user           string
-	db_host           string
-	db_max_idle_conns int
-	db_max_open_conns int
-	db_disable_tls    bool
+	DBUser       string `mapstructure:"DB_USER" default:"blog"`
+	DBPassword   string `mapstructure:"DB_PASSWORD" omit:"true" default:"islamghany"`
+	DBHost       string `mapstructure:"DB_HOST" default:"localhost:5432"`
+	DBName       string `mapstructure:"DB_NAME" default:"blog_db"`
+	MaxIdleConns int    `mapstructure:"MAX_IDLE_CONNS" default:"25"`
+	MaxOpenConns int    `mapstructure:"MAX_OPEN_CONNS" default:"25"`
+	DisabelTLS   bool   `mapstructure:"DISABLE_TLS" default:"true"`
 }
 
 func main() {
+	// go run main.go migrate
+	var cmd string
+	if len(os.Args) > 1 {
+		cmd = os.Args[1]
+	}
 	var config Config
-	flag.StringVar(&config.db_name, "db_name", "blog_db", "Database name")
-	flag.StringVar(&config.db_pass, "db_pass", "islamghany", "Database password")
-	flag.StringVar(&config.db_user, "db_user", "blog", "Database user")
-	flag.StringVar(&config.db_host, "db_host", "localhost:5432", "Database host")
-	flag.IntVar(&config.db_max_idle_conns, "db_max_idle_conns", 10, "Database max idle connections")
-	flag.IntVar(&config.db_max_open_conns, "db_max_open_conns", 10, "Database max open connections")
-	flag.BoolVar(&config.db_disable_tls, "db_disable_tls", true, "Disable TLS for database connection")
-	flag.StringVar(&config.cmd, "cmd", "", "Command to run")
-	flag.Parse()
-
+	viper.SetDefault("DB_USER", "blog")
+	viper.SetDefault("DB_PASSWORD", "islamghany")
+	viper.SetDefault("DB_HOST", "localhost:5432")
+	viper.SetDefault("DB_NAME", "blog_db")
+	viper.SetDefault("MAX_IDLE_CONNS", 25)
+	viper.SetDefault("MAX_OPEN_CONNS", 25)
+	viper.SetDefault("DISABLE_TLS", true)
+	viper.AutomaticEnv()
+	err := viper.Unmarshal(&config)
+	if err != nil {
+		fmt.Println("error unmarshalling config", err)
+	}
 	// log := logger.New(io.Discard, logger.LevelInfo, "ADMIN", func(ctx context.Context) string {
 	// 	return "00000000-0000-0000-0000-000000000000"
 	// })
 
-	if err := run(&config); err != nil {
+	if err := run(&config, cmd); err != nil {
 		fmt.Printf("error: %s\n", err)
 		os.Exit(1)
 	}
 
 }
 
-func run(config *Config) error {
-	if config.cmd == "" {
+func run(config *Config, cmd string) error {
+	if cmd == "" {
 		return fmt.Errorf("no command provided")
 	}
 	dbConfig := db.Config{
-		Host:         config.db_host,
-		User:         config.db_user,
-		Name:         config.db_name,
-		Password:     config.db_pass,
-		MaxIdleConns: config.db_max_idle_conns,
-		MaxOpenConns: config.db_max_open_conns,
-		DisabelTLS:   config.db_disable_tls,
+		Host:         config.DBHost,
+		User:         config.DBUser,
+		Name:         config.DBName,
+		Password:     config.DBPassword,
+		MaxIdleConns: config.MaxIdleConns,
+		MaxOpenConns: config.MaxOpenConns,
+		DisabelTLS:   config.DisabelTLS,
 	}
 
 	q := make(url.Values)
@@ -74,7 +81,7 @@ func run(config *Config) error {
 		RawQuery: q.Encode(),
 	}
 	ctx := context.Background()
-	cmds := strings.Split(config.cmd, ",")
+	cmds := strings.Split(cmd, ",")
 	for _, cmd := range cmds {
 		switch cmd {
 		case "migrate":
@@ -86,7 +93,7 @@ func run(config *Config) error {
 				return fmt.Errorf("error seeding database: %w", err)
 			}
 		default:
-			return fmt.Errorf("unknown command %s", config.cmd)
+			return fmt.Errorf("unknown command %s", cmd)
 		}
 
 	}
