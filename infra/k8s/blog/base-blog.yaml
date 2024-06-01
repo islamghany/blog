@@ -21,7 +21,15 @@ spec:
         app: blog
 
     spec:
-      #don't pull the image from the internet
+      initContainers:
+        - name: inti-migrate-seed
+          image: localhost/islamghany/blog-api:0.0.1
+          imagePullPolicy: Never
+          command: ["./admin", "migrate,seed"]
+          envFrom:
+            - configMapRef:
+                name: blog-config
+
       containers:
         - name: blog
           image: localhost/islamghany/blog-api:0.0.1

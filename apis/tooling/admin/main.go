@@ -7,7 +7,6 @@ import (
 	db "github/islamghany/blog/business/data/dbsql/pgx"
 	"github/islamghany/blog/business/web/v1/connect"
 	"github/islamghany/blog/foundation/logger"
-	"io"
 	"net/url"
 	"os"
 	"strings"
@@ -15,6 +14,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
+
+var build = "development"
 
 type Config struct {
 	DBUser       string `mapstructure:"DB_USER" default:"blog"`
@@ -45,12 +46,12 @@ func main() {
 	if err != nil {
 		fmt.Println("error unmarshalling config", err)
 	}
-	log := logger.New(io.Discard, logger.LevelInfo, "ADMIN", func(ctx context.Context) string {
+	log := logger.New(os.Stdout, logger.LevelInfo, "ADMIN", func(ctx context.Context) string {
 		return "00000000-0000-0000-0000-000000000000"
 	})
-
+	log.Info(context.Background(), "startup", "config", config)
 	if err := run(log, &config, cmd); err != nil {
-		fmt.Printf("error: %s\n", err)
+		log.Error(context.Background(), "startup", "error", err)
 		os.Exit(1)
 	}
 
@@ -91,16 +92,17 @@ func run(log *logger.Logger, config *Config, cmd string) error {
 	if err != nil {
 		return fmt.Errorf("error connecting to database: %w", err)
 	}
+	log.Info(ctx, "startup", "status", "db connected", "host", config.DBHost)
 	defer conn.Close()
 	cmds := strings.Split(cmd, ",")
 	for _, cmd := range cmds {
 		switch cmd {
 		case "migrate":
-			if err := commands.Migrate(ctx, DSN.String()); err != nil {
+			if err := commands.Migrate(ctx, log, DSN.String()); err != nil {
 				return fmt.Errorf("error migrating database: %w", err)
 			}
 		case "seed":
-			if err := commands.Seed(ctx, conn); err != nil {
+			if err := commands.Seed(ctx, log, conn); err != nil {
 				return fmt.Errorf("error seeding database: %w", err)
 			}
 		default:

@@ -9,7 +9,7 @@ COPY . /service
 
 # Set the working directory to admin tooling
 WORKDIR /service/apis/tooling/admin
-RUN go build -o admin 
+RUN go build -o admin -ldflags "-X main.build=${BUILD_REF}"
 
 # Set the working directory to blog-api
 WORKDIR /service/apis/blog-api
@@ -19,6 +19,7 @@ RUN go build -o blog-api -ldflags "-X main.build=${BUILD_REF}"
 FROM alpine:3.19
 ARG BUILD_DATE
 ARG BUILD_REF
+
 # The combined use of addgroup and adduser in the Dockerfile is to ensure that the application runs under a specific non-root user,
 # enhancing security. Running applications as non-root users is a best practice because it limits the potential damage that can be done if the application is compromised.
 RUN addgroup -g 1000 -S blog && \
@@ -28,6 +29,9 @@ RUN addgroup -g 1000 -S blog && \
 COPY --from=build_blog --chown=blog:blog /service/apis/tooling/admin/admin /service/admin
 # Copy the built binary from the build stage
 COPY --from=build_blog --chown=blog:blog /service/apis/blog-api/blog-api /service/blog-api
+
+# Ensure binaries have execute permissions
+RUN chmod +x /service/admin /service/blog-api
 
 # Copy the environment file into the container
 COPY dev.env /service/dev.env
@@ -39,4 +43,4 @@ WORKDIR /service
 USER blog
 
 # Define the entrypoint
-CMD [ "./blog-api" ]
+CMD ["./blog-api"]

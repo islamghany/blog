@@ -9,7 +9,7 @@ spec:
   ports:
     - name: blog
       port: 8000
-      targetPort: sales
+      targetPort: blog
     - name: blog-debug
       port: 8001
       targetPort: blog-debug

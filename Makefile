@@ -39,20 +39,30 @@ docker/build:
 		--build-arg BUILD_REF=$(BLOG_IMAGE_NAME) \
 		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
 		.
+
+
 docker/rmi:
 	@echo "Removing docker image"
 	docker rmi ${BLOG_IMAGE_NAME}
 
+
 docker/run:
+	@echo "Running container with name blog-api on port 8000"
+	docker run --name ${APP_NAME} -p 8000:8000 ${BLOG_IMAGE_NAME}
+docker/exec:
 	@echo "Running docker image"
-	docker run -p 8000:8000 ${BLOG_IMAGE_NAME}
+	docker exec -it ${APP_NAME} /bin/sh
 
 docker/stop:
 	@echo "Stopping docker image"
-	docker stop ${BLOG_IMAGE_NAME}
+	docker stop ${APP_NAME}
+docker/start:
+	@echo "Starting docker image"
+	docker start ${APP_NAME}
+
 docker/remove:
 	@echo "Removing docker image"
-	docker rm ${BLOG_IMAGE_NAME}
+	docker rm ${APP_NAME}
 
 docker/db/run:
 	@echo "Running postgres db"
@@ -88,13 +98,18 @@ dev-down:
 	kustomize build infra/k8s/postgres | kubectl delete -f -
 
 dev-status-all:
-	kubectl get nodes -o wide
-	kubectl get svc -o wide
+	kubectl get nodes -o wide --all-namespaces
+	kubectl get svc -o wide --all-namespaces
 	kubectl get pods -o wide --watch --all-namespaces
 
 dev-logs:
 	kubectl logs --namespace=$(NAMESPACE) -l app=blog --all-containers=true -f --tail=100 --max-log-requests=6 | go run apis/tooling/logfmt/main.go -service=$(BLOG_IMAGE_NAME)
 
+list-init-container:
+	kubectl get pods --namespace=$(NAMESPACE) -l app=blog -o jsonpath='{.items[*].spec.initContainers[*].name}'
+## get the logs of the init container which has the name inti-migrate-seed
+dev-logs-init-container:
+	kubectl logs --namespace=$(NAMESPACE) -l app=blog-56695fb68d-5l2jt -c init-migrate-seed -f --tail=100 --max-log-requests=6
 ## database 
 db/psql:
 	@psql ${DB_DSN} 

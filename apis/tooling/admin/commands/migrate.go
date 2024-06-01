@@ -2,15 +2,15 @@ package commands
 
 import (
 	"context"
-	"fmt"
 	"github/islamghany/blog/business/data/dbmigrate"
+	"github/islamghany/blog/foundation/logger"
 )
 
-func Migrate(ctx context.Context, dsn string) error {
+func Migrate(ctx context.Context, log *logger.Logger, dsn string) error {
 	err := dbmigrate.MigrateUp(ctx, dsn)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Migrated database")
+	log.Info(ctx, "Migrated database")
 	return nil
 }

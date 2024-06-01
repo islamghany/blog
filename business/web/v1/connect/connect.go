@@ -23,7 +23,7 @@ func ConnectWithBackOff[T any](ctx context.Context, log *logger.Logger, connectN
 			return nil, err
 		}
 		log.Info(ctx, connectName, "error", err, "retrying in", timeToSleep, "seconds")
-		timeToSleep = timeToSleep * backOff * 2
+		timeToSleep = timeToSleep * (timeToSleep + 1)
 		log.Info(ctx, connectName, "retrying in", timeToSleep, "seconds")
 		time.Sleep(time.Duration(timeToSleep) * time.Second)
 		continue
