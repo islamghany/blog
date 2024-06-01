@@ -4,18 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github/islamghany/blog/business/data/dbmigrate"
-	db "github/islamghany/blog/business/data/dbsql/pgx"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func Seed(ctx context.Context, cfg db.Config) error {
+func Seed(ctx context.Context, conn *sqlx.DB) error {
 
-	conn, err := db.Open(cfg)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	err = dbmigrate.SeedsWithSQLX(ctx, conn)
+	err := dbmigrate.SeedsWithSQLX(ctx, conn)
 	if err != nil {
 		return err
 	}

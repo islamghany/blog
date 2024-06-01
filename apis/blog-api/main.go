@@ -13,6 +13,7 @@ import (
 	"github/islamghany/blog/business/core/user/userdb"
 	db "github/islamghany/blog/business/data/dbsql/pgx"
 	v1 "github/islamghany/blog/business/web/v1"
+	"github/islamghany/blog/business/web/v1/connect"
 	"github/islamghany/blog/business/web/v1/debug"
 	"github/islamghany/blog/business/web/v1/mid"
 	"github/islamghany/blog/foundation/logger"
@@ -23,6 +24,8 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+
+	"github.com/jmoiron/sqlx"
 	// "github/islamghany/blog/bussiness/v1/debug"
 )
 
@@ -85,17 +88,19 @@ func run(ctx context.Context, log *logger.Logger, cfg *config.Config) error {
 	// ==========================================================================================
 	// Starting the DB
 	log.Info(ctx, "startup", "status", "db starting", "host", cfg.DBHost)
-	db, err := db.Open(
-		db.Config{
-			Name:         cfg.DBName,
-			Host:         cfg.DBHost,
-			Password:     cfg.DBPassword,
-			User:         cfg.DBUser,
-			DisabelTLS:   cfg.DisabelTLS,
-			MaxOpenConns: cfg.MaxOpenConns,
-			MaxIdleConns: cfg.MaxIdleConns,
-		},
-	)
+	db, err := connect.ConnectWithBackOff(ctx, log, "POSTGRESQL", func() (*sqlx.DB, error) {
+		return db.Open(
+			db.Config{
+				Name:         cfg.DBName,
+				Host:         cfg.DBHost,
+				Password:     cfg.DBPassword,
+				User:         cfg.DBUser,
+				DisabelTLS:   cfg.DisabelTLS,
+				MaxOpenConns: cfg.MaxOpenConns,
+				MaxIdleConns: cfg.MaxIdleConns,
+			},
+		)
+	}, 10)
 	if err != nil {
 		return fmt.Errorf("db conection err: %w", err)
 	}

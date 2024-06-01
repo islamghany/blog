@@ -69,7 +69,7 @@ docker/db/start:
 ## k8s
 dev-up:
 	@echo "Making minikube look at the local docker daemon"
-	eval $(minikube -p minikube docker-env)
+	eval $$(minikube -p minikube docker-env)
 	@echo "Building docker image for blog api in minikube"
 	docker build \
 		-f infra/docker/dockerfile.blog \

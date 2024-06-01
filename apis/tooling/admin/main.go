@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"github/islamghany/blog/apis/tooling/admin/commands"
 	db "github/islamghany/blog/business/data/dbsql/pgx"
+	"github/islamghany/blog/business/web/v1/connect"
+	"github/islamghany/blog/foundation/logger"
+	"io"
 	"net/url"
 	"os"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
 
@@ -41,18 +45,18 @@ func main() {
 	if err != nil {
 		fmt.Println("error unmarshalling config", err)
 	}
-	// log := logger.New(io.Discard, logger.LevelInfo, "ADMIN", func(ctx context.Context) string {
-	// 	return "00000000-0000-0000-0000-000000000000"
-	// })
+	log := logger.New(io.Discard, logger.LevelInfo, "ADMIN", func(ctx context.Context) string {
+		return "00000000-0000-0000-0000-000000000000"
+	})
 
-	if err := run(&config, cmd); err != nil {
+	if err := run(log, &config, cmd); err != nil {
 		fmt.Printf("error: %s\n", err)
 		os.Exit(1)
 	}
 
 }
 
-func run(config *Config, cmd string) error {
+func run(log *logger.Logger, config *Config, cmd string) error {
 	if cmd == "" {
 		return fmt.Errorf("no command provided")
 	}
@@ -81,6 +85,13 @@ func run(config *Config, cmd string) error {
 		RawQuery: q.Encode(),
 	}
 	ctx := context.Background()
+	conn, err := connect.ConnectWithBackOff(ctx, log, "POSTGRESQL", func() (*sqlx.DB, error) {
+		return db.Open(dbConfig)
+	}, 10)
+	if err != nil {
+		return fmt.Errorf("error connecting to database: %w", err)
+	}
+	defer conn.Close()
 	cmds := strings.Split(cmd, ",")
 	for _, cmd := range cmds {
 		switch cmd {
@@ -89,7 +100,7 @@ func run(config *Config, cmd string) error {
 				return fmt.Errorf("error migrating database: %w", err)
 			}
 		case "seed":
-			if err := commands.Seed(ctx, dbConfig); err != nil {
+			if err := commands.Seed(ctx, conn); err != nil {
 				return fmt.Errorf("error seeding database: %w", err)
 			}
 		default:
