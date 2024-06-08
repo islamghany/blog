@@ -31,6 +31,7 @@ type WebMuxConfig struct {
 	Whitelist   []string
 	Auth        *auth.Auth
 	ArticleCore *article.Core
+	Build       string
 }
 
 // an interface that we use to inject routes from the handlers

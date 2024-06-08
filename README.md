@@ -50,13 +50,6 @@ minikube service blog-admin -n blog-system
 
 A table like the following will be displayed:
 
-<!-- |-------------|--------------|-----------------|-----------------------------|
-| NAMESPACE | NAME | TARGET PORT | URL |
-|-------------|--------------|-----------------|-----------------------------|
-| blog-system | blog-service | blog/8000 | http://192.168.59.104:30131 |
-| | | blog-debug/8001 | http://192.168.59.104:32413 |
-|-------------|--------------|-----------------|-----------------------------| -->
-
 | NAMESPACE   | NAME       | TARGET PORT | URL                                |
 | ----------- | ---------- | ----------- | ---------------------------------- |
 | blog-system | blog-admin | 8000        | http://http://192.168.59.104:30131 |
@@ -78,7 +71,8 @@ minikube delete
 
 ## TODO List
 
-- [ ] Liveness and Readiness probes.
+- [x] Run InitContainer to initialize the database migrations/seed.
+- [x] Liveness and Readiness probes.
 - [ ] Resources Requests and Limits.
 - [ ] Horizontal Pod Autoscaler.
 - [ ] Ingress Controller.

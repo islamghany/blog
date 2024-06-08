@@ -9,13 +9,16 @@ import (
 )
 
 type Config struct {
-	DB  *sqlx.DB
-	Log *logger.Logger
+	DB    *sqlx.DB
+	Log   *logger.Logger
+	Build string
 }
 
 func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
-	healthCheck := New(cfg.DB, cfg.Log)
+	healthCheck := New(cfg.DB, cfg.Log, cfg.Build)
 	app.Handle(http.MethodGet, version, "/healthcheck", healthCheck.HealthCheckHandler)
+	app.Handle(http.MethodGet, version, "/liveness", healthCheck.LivenessHandler)
+	app.Handle(http.MethodGet, version, "/readiness", healthCheck.ReadinessHandler)
 }

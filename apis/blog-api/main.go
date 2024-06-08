@@ -138,6 +138,7 @@ func run(ctx context.Context, log *logger.Logger, cfg *config.Config) error {
 		Whitelist:   cfg.WHITELIST,
 		Auth:        auth,
 		ArticleCore: articleCore,
+		Build:       build,
 	}, handlers.Routes{})
 	srv := http.Server{
 		Addr:         cfg.APIHost,

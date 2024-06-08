@@ -13,8 +13,9 @@ type Routes struct{}
 
 func (Routes) Add(app *web.App, cfg *v1.WebMuxConfig) {
 	healthcheck.Routes(app, healthcheck.Config{
-		DB:  cfg.DB,
-		Log: cfg.Log,
+		DB:    cfg.DB,
+		Log:   cfg.Log,
+		Build: cfg.Build,
 	})
 	usergrp.Routes(app, usergrp.Config{
 		DB:   cfg.DB,

@@ -7,6 +7,7 @@ import (
 	"github/islamghany/blog/foundation/logger"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -59,6 +60,38 @@ func Open(cfg Config) (*sqlx.DB, error) {
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 
 	return db, nil
+}
+
+func StatusCheck(ctx context.Context, db *sqlx.DB) error {
+
+	// If the user doesn't give us a deadline set 1 second.
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Second)
+		defer cancel()
+	}
+
+	var pingError error
+	for attempts := 0; ; attempts++ {
+		pingError = db.Ping()
+		if pingError == nil {
+			break
+		}
+		// sleep for a bit before trying again
+		time.Sleep(time.Duration(attempts) * 100 * time.Millisecond)
+		// check if the context is done
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+	}
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	// Run a simple query to determine connectivity.
+	// Running this query forces a round trip through the database.
+	const q = `SELECT true`
+	var tmp bool
+	return db.QueryRowContext(ctx, q).Scan(&tmp)
 }
 
 func NamedExecContext(ctx context.Context, log *logger.Logger, db sqlx.ExtContext, query string, data any) error {

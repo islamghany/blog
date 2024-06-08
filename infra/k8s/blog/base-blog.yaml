@@ -22,7 +22,7 @@ spec:
 
     spec:
       initContainers:
-        - name: inti-migrate-seed
+        - name: init-migrate-seed
           image: localhost/islamghany/blog-api:0.0.1
           imagePullPolicy: Never
           command: ["./admin", "migrate,seed"]
@@ -34,11 +34,52 @@ spec:
         - name: blog
           image: localhost/islamghany/blog-api:0.0.1
           imagePullPolicy: Never
+
+          # k8s uses livenessProbe to know when to restart a container
+          livenessProbe:
+            httpGet:
+              path: /v1/liveness
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          # k8s uses readinessProbe to wait for a container to be ready to start receiving traffic
+          readinessProbe:
+            httpGet:
+              path: /v1/readiness
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
           ports:
             - name: blog
               containerPort: 8000
             - name: blog-debug
               containerPort: 8001
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+
           envFrom:
             - configMapRef:
                 name: blog-config
