@@ -1,3 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
   - postgres-deployment.yaml
   - postgres-pv.yaml
+
+# Secret generator
+secretGenerator:
+  - name: blog-secret
+    literals:
+      - DB_USER=blog
+      - DB_PASSWORD=islamghany
+
+generatorOptions:
+  disableNameSuffixHash: true

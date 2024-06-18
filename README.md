@@ -81,5 +81,5 @@ minikube delete
 - [ ] Helm Charts.
 - [ ] Add more tests.
 - [ ] Network Policies.
-- [ ] Secrets Management.
+- [x] Secrets Management.
 - [ ] Security Best Practices.

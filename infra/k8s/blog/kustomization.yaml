@@ -1,4 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
   - base-blog.yaml
   - blog-service.yaml
   - blog-configmap.yaml
+
+secretGenerator:
+  - name: blog-secret
+    literals:
+      - DB_USER=blog
+      - DB_PASSWORD=islamghany
+      - JWT_SECRET=bd4e4109e40ee98f84b017d5fd421a59f872b9b2dfef98645e47cf834628a5
+
+generatorOptions:
+  disableNameSuffixHash: true

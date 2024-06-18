@@ -28,9 +28,15 @@ spec:
             - name: POSTGRES_DB
               value: blog_db
             - name: POSTGRES_USER
-              value: blog
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: DB_USER
             - name: POSTGRES_PASSWORD
-              value: islamghany
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: DB_PASSWORD
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
@@ -50,3 +56,14 @@ spec:
   selector:
     app: postgres
   type: ClusterIP
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: blog-secret
+  namespace: blog-system
+type: Opaque
+data:
+  DB_USER: YmxvZw==
+  DB_PASSWORD: aXNsYW1naGFueQ==

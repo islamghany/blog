@@ -83,3 +83,5 @@ spec:
           envFrom:
             - configMapRef:
                 name: blog-config
+            - secretRef:
+                name: blog-secret
