@@ -76,7 +76,7 @@ minikube delete
 - [ ] Resources Requests and Limits.
 - [ ] Horizontal Pod Autoscaler.
 - [ ] Ingress Controller.
-- [ ] Logging and Monitoring with Prometheus and Grafana.
+- [x] Monitoring with Prometheus and Grafana.
 - [ ] CI/CD Integration.
 - [ ] Helm Charts.
 - [ ] Add more tests.
