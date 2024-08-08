@@ -3,12 +3,12 @@
     "workbench.colorTheme": "GitHub Dark Dimmed",
     // style the status bar
     "workbench.colorCustomizations": {
-        "statusBar.background": "#500909",
+        "statusBar.background": "#000000",
         "statusBar.noFolderBackground": "#bb2f2f",
         "statusBar.debuggingBackground": "#8a1515",
         "statusBar.debuggingForeground": "#ffffff",
         "statusBar.foreground": "#fefefe",
-        "statusBar.border": "#801010"
+        "statusBar.border": "#212020"
     }
     
 }

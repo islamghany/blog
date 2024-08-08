@@ -9,7 +9,7 @@ data:
   IDLE_TIMEOUT: "120s"
   SHUTDOWN_TIMEOUT: "20s"
   API_HOST: "0.0.0.0:8000"
-  DEBUG_HOST: "0.0.0.0:8001"
+  DEBUG_HOST: "0.0.0.0:8080"
   WHITELIST: "http://localhost:3000,http://localhost:5173"
   DB_HOST: "postgres:5432"
   DB_NAME: "blog_db"

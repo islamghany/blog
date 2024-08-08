@@ -11,7 +11,7 @@ spec:
       port: 8000
       targetPort: blog
     - name: blog-debug
-      port: 8001
+      port: 8080
       targetPort: blog-debug
 
   type: LoadBalancer

@@ -15,7 +15,7 @@ type Config struct {
 	IdleTimeout     time.Duration `mapstructure:"IDLE_TIMEOUT"`
 	ShutdownTimeout time.Duration `mapstructure:"SHUTDOWN_TIMEOUT" omit:"true" default:"20s"`
 	APIHost         string        `mapstructure:"API_HOST" default:"0.0.0.0:8000"`
-	DebugHost       string        `mapstructure:"DEBUG_HOST" mask:"true" default:"0.0.0.0:8001"`
+	DebugHost       string        `mapstructure:"DEBUG_HOST" mask:"true" default:"0.0.0.0:8080"`
 	WHITELIST       []string      `mapstructure:"WHITELIST" default:"http://localhost:3000,http://localhost:5173"`
 	// DB
 	DBUser       string `mapstructure:"DB_USER" default:"blog"`

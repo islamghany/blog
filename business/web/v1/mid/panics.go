@@ -17,6 +17,7 @@ func Panics() web.Middleware {
 					trace := debug.Stack()
 					err = fmt.Errorf("PANIC [%v] TRACE[%s]", rec, string(trace))
 					metrics.AddPanics(ctx)
+					metrics.AddPromRequest(ctx, r.Method, r.URL.Path, "600")
 				}
 			}()
 			return handler(ctx, w, r)

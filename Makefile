@@ -93,9 +93,13 @@ dev-up:
 dev-apply:
 	kustomize build infra/k8s/blog | kubectl apply -f -
 	kustomize build infra/k8s/postgres | kubectl apply -f -
+	kustomize build infra/k8s/prometheus | kubectl apply -f -
+	kustomize build infra/k8s/grafana | kubectl apply -f -
 dev-down:
 	kustomize build infra/k8s/blog | kubectl delete -f -
 	kustomize build infra/k8s/postgres | kubectl delete -f -
+	kustomize build infra/k8s/prometheus | kubectl delete -f -
+	kustomize build infra/k8s/grafana | kubectl delete -f -
 
 dev-status-all:
 	kubectl get nodes -o wide --all-namespaces
